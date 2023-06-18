@@ -2,15 +2,29 @@ use std::error;
 use std::fs::File;
 use std::io::Write;
 
+/// The default file path, if not provided.
 const FILE_PATH: &str = "render.ppm";
 
+/// Let's Box any errors!
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+
+/// Represent colors with this type.
 type Color32 = i64;
+
+/// A 2-D collection of pixels. Index as `pixels[y][x]`.
 type Pixels = Vec<Vec<Color32>>;
 
+
+/// The collection associated with a particular image. 
 struct Image {
+    /// Width of the image.
     width: usize,
+
+    /// Height of the image.
     height: usize,
+
+    /// Collection of pixels.
+    /// This is supposed to be populated by the time we write the image.
     pixels: Pixels,
 }
 
@@ -31,6 +45,8 @@ impl Image {
         }
     }
 
+    /// Write the `Image` data to a `.ppm` file. 
+    /// Note that the order is (B, G, R)
     fn write_to_file(self: Self) -> Result<()> {
        let mut file = File::create(FILE_PATH)?;
        file.write_all(format!("P6\n{} {} 255\n", self.width, self.height).as_bytes())?;
