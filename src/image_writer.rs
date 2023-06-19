@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::Write;
 
 /// The default file path, if not provided.
-const FILE_PATH: &str = "render.ppm";
+const DEFAULT_FILE_PATH: &str = "render.ppm";
 
 /// Let's Box any errors!
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -47,8 +47,8 @@ impl Image {
 
     /// Write the `Image` data to a `.ppm` file. 
     /// Note that the order is (B, G, R)
-    fn write_to_file(self: Self) -> Result<()> {
-       let mut file = File::create(FILE_PATH)?;
+    fn write_to_file(self: Self, file_path: Option<&str>) -> Result<()> {
+       let mut file = File::create("renders/".to_owned() + file_path.unwrap_or(DEFAULT_FILE_PATH))?;
        file.write_all(format!("P6\n{} {} 255\n", self.width, self.height).as_bytes())?;
 
        let mut all_bytes: Vec<u8> = Vec::new();
@@ -81,12 +81,15 @@ mod tests {
 
     #[test]
     fn test_image_write() {
-        let width: usize = 256;
-        let height: usize = 256;
+        let file_path: Option<&str> = Some("test_render.ppm");
+
+        let width: usize = 512;
+        let height: usize = 512;
 
         let mut pixels: Pixels = vec![vec![0_i64; width as usize]; height as usize];
 
         for y in 0..height {
+            println!("Scan lines remaining: {}", height-y);
             for x in 0..width {
                 let r = (255.999 * ((x as f32) / ((width - 1) as f32))) as i64 ;
                 let g = (255.999 * (((height-y-1) as f32) / ((height - 1) as f32))) as i64;
@@ -101,6 +104,6 @@ mod tests {
         }
 
         let image = Image::new(width, height, pixels);
-        assert!(matches!(image.write_to_file(), Ok(())));
+        assert!(matches!(image.write_to_file(file_path), Ok(())));
     }
 }
