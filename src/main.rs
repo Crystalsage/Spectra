@@ -1,4 +1,3 @@
-mod image_writer;   
 mod vector;
 
 fn main() {
