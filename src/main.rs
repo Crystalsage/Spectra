@@ -8,6 +8,7 @@ use crate::color::{make_ray_color, make_color};
 use crate::vector::{Point3, Vec3};
 use crate::ray::Ray;
 
+
 fn main() {
     let file_path: Option<&str> = Some("render.ppm");
 
