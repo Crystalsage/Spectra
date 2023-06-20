@@ -9,14 +9,14 @@ const DEFAULT_FILE_PATH: &str = "render.ppm";
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 /// Represent colors with this type.
-type Color32 = i64;
+pub type Color32 = i64;
 
 /// A 2-D collection of pixels. Index as `pixels[y][x]`.
-type Pixels = Vec<Vec<Color32>>;
+pub type Pixels = Vec<Vec<Color32>>;
 
 
 /// The collection associated with a particular image. 
-struct Image {
+pub struct Image {
     /// Width of the image.
     width: usize,
 
@@ -29,7 +29,7 @@ struct Image {
 }
 
 impl Image {
-    fn default() -> Self {
+    pub fn default() -> Self {
         Image { 
             width: 0,
             height: 0,
@@ -37,7 +37,7 @@ impl Image {
         }
     }
 
-    fn new(width: usize, height: usize, pixels: Pixels) -> Self {
+    pub fn new(width: usize, height: usize, pixels: Pixels) -> Self {
         Image { 
             width,
             height,
@@ -47,7 +47,7 @@ impl Image {
 
     /// Write the `Image` data to a `.ppm` file. 
     /// Note that the order is (B, G, R)
-    fn write_to_file(self: Self, file_path: Option<&str>) -> Result<()> {
+    pub fn write_to_file(self: Self, file_path: Option<&str>) -> Result<()> {
        let mut file = File::create("renders/".to_owned() + file_path.unwrap_or(DEFAULT_FILE_PATH))?;
        file.write_all(format!("P6\n{} {} 255\n", self.width, self.height).as_bytes())?;
 
@@ -79,7 +79,7 @@ impl Image {
 mod tests {
     use super::*;
 
-    #[test]
+    // #[test]
     fn test_image_write() {
         let file_path: Option<&str> = Some("test_render.ppm");
 

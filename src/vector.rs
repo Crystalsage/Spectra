@@ -2,19 +2,19 @@ use std::ops;
 use std::fmt;
 
 
-type Point3 = Vec3;
-type Color = Vec3;
+pub type Point3 = Vec3;
+pub type Color = Vec3;
 
-#[derive(Debug, PartialEq)]
-struct Vec3 {
-    x: f64,
-    y: f64,
-    z: f64,
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct Vec3 {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 impl Vec3 {
     /// Initialize a `Vec3` at origin.
-    fn default() -> Self {
+    pub fn default() -> Self {
         Vec3 { 
             x: 0.0, 
             y: 0.0,  
@@ -23,7 +23,7 @@ impl Vec3 {
     }
 
     /// Create a new `Vec3` at given co-ordinates.
-    fn new(x: f64, y: f64, z: f64) -> Self {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { 
             x, 
             y,
@@ -31,11 +31,11 @@ impl Vec3 {
         }
     }
 
-    fn dot(self: Self, other: Self) -> f64  {
+    pub fn dot(self: Self, other: Self) -> f64  {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    fn cross(self: Self, other: Self) -> Self {
+    pub fn cross(self: Self, other: Self) -> Self {
         Vec3 {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,
@@ -43,16 +43,16 @@ impl Vec3 {
         }
     }
 
-    fn unit_vector(self: Self) -> Self {
+    pub fn unit_vector(self: Self) -> Self {
         let length = self.length();
         self / length
     }
 
-    fn length(self: &Self) -> f64 {
+    pub fn length(self: &Self) -> f64 {
         self.length_squared().sqrt()
     }
 
-    fn length_squared(self: &Self) -> f64 {
+    pub fn length_squared(self: &Self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 }
@@ -113,6 +113,18 @@ impl ops::Mul<f64> for Vec3 {
             x: self.x * rhs,
             y: self.y * rhs,
             z: self.z * rhs,
+        }
+    }
+}
+
+impl ops::Mul<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3 {
+            x: self * rhs.x,
+            y: self * rhs.y,
+            z: self * rhs.z,
         }
     }
 }
