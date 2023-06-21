@@ -1,6 +1,9 @@
+use std::num::NonZeroU8;
 use std::ops;
 use std::fmt;
+use std::ops::ControlFlow;
 
+use crate::random_f64;
 
 pub type Point3 = Vec3;
 pub type Color = Vec3;
@@ -28,6 +31,43 @@ impl Vec3 {
             x, 
             y,
             z
+        }
+    }
+
+    pub fn random() -> Self {
+        Vec3 {
+            x: random_f64(None, None),
+            y: random_f64(None, None),
+            z: random_f64(None, None),
+        }
+    }
+
+    pub fn random_with_range(min: f64, max: f64) -> Self {
+        Vec3 {
+            x: random_f64(Some(min), Some(max)),
+            y: random_f64(Some(min), Some(max)),
+            z: random_f64(Some(min), Some(max)),
+        }
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let v: Vec3 = Vec3::random();
+            if v.length_squared() >= 1.0 { continue; }
+            return v;
+        }
+    }
+
+    pub fn random_unit_vector() -> Self {
+        Vec3::random_in_unit_sphere().unit_vector()
+    }
+
+    pub fn random_in_hemisphere(normal: &Vec3) -> Self {
+        let in_unit_sphere = Self::random_in_unit_sphere();
+        if in_unit_sphere.dot(normal) > 0.0 {
+            return in_unit_sphere;
+        } else {
+            return -in_unit_sphere;
         }
     }
 
