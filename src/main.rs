@@ -2,9 +2,14 @@ mod vector;
 mod color;
 mod image_writer;
 mod ray;
+mod hittable; 
+mod sphere;
+mod utility;
 
+use crate::hittable::Hittables;
 use crate::image_writer::{Image, Pixels};
 use crate::color::{make_ray_color, make_color};
+use crate::sphere::Sphere;
 use crate::vector::{Point3, Vec3};
 use crate::ray::Ray;
 
@@ -15,6 +20,11 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let width: usize = 1920;
     let height: usize = (width as f64 / aspect_ratio) as usize;
+
+    // World
+    let mut world: Hittables<Sphere> = Hittables::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5));
+    world.add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
+
 
     let viewport_height = 2.0;
     let viewport_width = aspect_ratio * viewport_height;
@@ -35,7 +45,7 @@ fn main() {
             let v: f64 = (height - y) as f64/ (height - 1) as f64;
 
             let r: Ray = Ray::new(origin, lower_left + (u * horizontal) + (v * vertical) - origin);
-            pixels[y][x] = make_color(make_ray_color(r));
+            pixels[y][x] = make_color(make_ray_color(r, &world));
         }
     }
 

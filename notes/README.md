@@ -78,3 +78,24 @@ $\therefore t^2 (b \cdot b) + 2t (b\cdot(A - C)) + (A - C) \cdot (A - C) - r^2 =
 Which is a quadratic equation. We can solve this equation for $t$ which would result in two real solutions, one real solution or no real solutions. This is explained graphically as follows:
 
 ![](./figures/ray_sphere_intersection.png)
+
+**Some optimisations**: 
+1. A vector dotted with itself is equal to its squared length.
+2. Since $b = 2 * OC \cdot \vec{b}$, where $\vec{b}$ is the direction of the ray, we can use a simple substitution $b = 2h$, which leads to the following. 
+
+$\frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \Rightarrow \frac{-h \pm \sqrt{h^2 - ac}}{a}$.
+
+This leads to slightly cleaner code.
+
+### Surface normals
+Any vector that is normal to the surface of the sphere points outward and has the equation $P - C$.
+
+We can visualize the normals with a color map. We map each component of the vector $P -C$ in the interval $[0,1]$ and then map $x \mapsto r$, $y \mapsto g$ and $z \mapsto b$.
+
+Combining the two things said above, we get the following:
+
+![](./figures/sphere_normal_map.png)
+
+- $t$ values can be restricted to a range $[t_{min}, t_{max}]$.
+
+## Antialiasing

@@ -1,21 +1,33 @@
+use std::f64::INFINITY;
+
+use crate::hittable::{Hittable, HitRecord};
 use crate::vector::Vec3;
 use crate::ray::Ray;
 use crate::image_writer::Color32;
 use crate::vector::{Point3, Color};
 
 
-fn intersects_sphere(center: Point3, radius: f64, ray: &Ray) -> bool  {
+fn intersects_sphere(center: Point3, radius: f64, ray: &Ray) -> f64  {
     let oc: Vec3 = ray.origin - center;
-    let a = ray.direction.dot(ray.direction);
-    let b = 2.0 * oc.dot(ray.direction);
-    let c = oc.dot(oc) - radius * radius;
+    let a = ray.direction.dot(&ray.direction);
+    let b = 2.0 * oc.dot(&ray.direction);
+    let c = oc.dot(&oc) - radius * radius;
     let discriminant = (b * b) - (4.0 * a * c);
-    discriminant > 0.0
+    if discriminant < 0.0 {
+        return -1.0;
+    } else {
+        return (-b - discriminant.sqrt()) / (2.0 * a);
+    }
+
 }
 
-pub fn make_ray_color(ray: Ray) -> Color {
-    if intersects_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, &ray) {
-        return Color::new(1.0, 0.0, 0.0);
+pub fn make_ray_color<T>(ray: Ray, world: &T) -> Color 
+where T: Hittable
+{
+    let mut rec = HitRecord::default();
+
+    if world.hit(&ray, 0.0, INFINITY, &mut rec) {
+        return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
     }
 
     let unit_direction: Vec3 = ray.direction.unit_vector();
