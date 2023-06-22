@@ -81,11 +81,13 @@ Which is a quadratic equation. We can solve this equation for $t$ which would re
 
 **Some optimisations**: 
 1. A vector dotted with itself is equal to its squared length.
-2. Since $b = 2 * OC \cdot \vec{b}$, where $\vec{b}$ is the direction of the ray, we can use a simple substitution $b = 2h$, which leads to the following. 
+2. Since $b = 2 * OC \cdot \vec{b}$, where $\vec{b}$ is the direction of the ray, we can use a simple substitution $b = 2h$, which leads to the following:
 
-$\frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \Rightarrow \frac{-h \pm \sqrt{h^2 - ac}}{a}$.
+$$\frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \Rightarrow \frac{-h \pm \sqrt{h^2 - ac}}{a}$$
 
 This leads to slightly cleaner code.
+
+- $t$ values can be restricted to a range $[t_{min}, t_{max}]$.
 
 ### Surface normals
 Any vector that is normal to the surface of the sphere points outward and has the equation $P - C$.
@@ -96,6 +98,43 @@ Combining the two things said above, we get the following:
 
 ![](./figures/sphere_normal_map.png)
 
-- $t$ values can be restricted to a range $[t_{min}, t_{max}]$.
-
 ## Antialiasing
+## Diffuse materials
+Diffusive materials are materials that diffuse light rays in every direction instead of just reflecting them in a single direction. Also called as matte materials. The reflected ray's light is attenuated.
+
+For ray tracers, this means having to randomize the direction of the reflected rays. We can randomize the directions at any angle in the hemisphere created by the surface tangent. The hemisphere is shown in *yellow* in the diagram below.
+
+
+A better trick exists:
+
+1. Assume an imaginary sphere of unit radius outside of the sphere. This sphere has the center $P + \vec{n}$, where $P$ is the hit point and $\vec{n}$ is the normal vector.
+2. Let $S$ be a random point inside of this imaginary sphere.
+3. Send a ray from the hit point $P$ to point $S$. Since $S$ itself is randomized, this ray's vector, $S - P$, is also randomized, thus achieving our goal.
+
+Note: $P - \vec{n}$ exists _inside_ the sphere.
+
+
+### Accurate color intensity
+We can use gamma correction to produce accurate colors, because most image viewers assume that images are gamma corrected. This means our images would look lighter. 
+
+We use a gamma factor of 2 in our ray tracer, which means that color components are raised to $\frac{1}{2}$, which is just the square root.
+
+### Question: Why and how do shadows form on surfaces? 
+
+## Reflectance and scatter
+For Lambertian surfaces, we can just scatter and attenuate by reflectance $R$, or scatter with no attenuation but absorb the fraction $1 - R$ of rays. We reject any scattered rays that have zero component in any direction, because they present some weird graphical glitches.
+
+For reflective surfaces, the rays are no longer randomly scattered, but are governed by mathematical rules. The direction of the reflected ray is $v + 2b$ where $v$ is the incoming ray and $b$ is the surface normal.
+
+**Intuition**:
+
+Let $r$ be the reflected ray. Let $v$ be the incident ray. $n$ is the surface normal vector. 
+
+By the law of reflection , $\theta_i = \theta_r$.
+
+$v$ can be decomposed into $v_{parallel}$ and $v_{perpendicular}$.
+
+$$r = -v_{perpendicular} + v_{parallel}$$
+$$\therefore r = -(v + v_{parallel}) + 2 * v_{parallel}$$
+$$\therefore r = -v + 2 * v_{parallel}$$
+$$\therefore r = -v + 2 * (v \cdot n) * n$$
