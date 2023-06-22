@@ -95,6 +95,15 @@ impl Vec3 {
     pub fn length_squared(self: &Self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
+    
+    pub fn near_zero(self: Self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
+
+    pub fn reflect(v: Vec3, n: Vec3) -> Self {
+        v - 2.0 * v.dot(&n) * n
+    }
 }
 
 

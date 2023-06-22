@@ -6,11 +6,14 @@ mod hittable;
 mod sphere;
 mod utility;
 mod camera;
+mod material;
 
 use crate::camera::Camera;
 use crate::hittable::Hittables;
+use crate::material::Material;
 use crate::image_writer::{Image, Pixels};
 use crate::color::{make_ray_color, make_color};
+use crate::material::MaterialType;
 use crate::sphere::Sphere;
 use crate::vector::{Point3, Vec3, Color};
 use crate::ray::Ray;
@@ -26,9 +29,18 @@ fn main() {
     let samples_per_pixel = 100;
     let max_depth = 50;
 
+    // Materials
+    let material_ground = Material::new(MaterialType::Lambertian(Color::new(0.8, 0.8, 0.0)));
+    let material_center = Material::new(MaterialType::Lambertian(Color::new(0.7, 0.3, 0.3)));
+
+    let material_left = Material::new(MaterialType::Metal(Color::new(0.8, 0.8, 0.8), 0.0));
+    let material_right = Material::new(MaterialType::Metal(Color::new(0.8, 0.6, 0.2), 0.0));
+
     // World
-    let mut world: Hittables<Sphere> = Hittables::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5));
-    world.add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
+    let mut world: Hittables<Sphere> = Hittables::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground));
+    world.add(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center));
+    world.add(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, material_left));
+    world.add(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right));
 
     // Camera
     let cam = Camera::default();

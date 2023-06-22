@@ -32,8 +32,14 @@ where T: Hittable
     }
 
     if world.hit(&ray, 0.001, INFINITY, &mut rec) {
-        let target: Point3 = rec.p + Vec3::random_in_hemisphere(&rec.normal);
-        return 0.5 * make_ray_color(Ray::new(rec.p, target - rec.p), world, depth - 1);
+        let mut scattered: Ray = Ray::default();
+        let mut attentuation: Color = Color::default();
+
+        if rec.material.scatter(&ray, &rec, &mut attentuation, &mut scattered) {
+            return attentuation * make_ray_color(scattered, world, depth-1);
+        }
+
+        return Color::new(0.0, 0.0, 0.0);
     }
 
     let unit_direction: Vec3 = ray.direction.unit_vector();
