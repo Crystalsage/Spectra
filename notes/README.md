@@ -164,3 +164,22 @@ $$\eta \cdot \sin{\theta} = \eta' \cdot \sin'{\theta}$$
 
 Since the refracted ray is $\mathbf{R'}$
 $$ \mathbf{R'} = \mathbf{R'}_{\bot} + \mathbf{R'}_{\parallel}$$
+
+If we solve for $\mathbf{R'}_{\bot}$ and $\mathbf{R'}_{\parallel}$, we  have: 
+
+$$\mathbf{R'}_{\bot} = \frac{\eta}{\eta'}(\mathbf{R} +  \cos{\theta n})$$
+
+$$\mathbf{R'}_{\parallel} = - \sqrt{1 - |\mathbf{R'_{\bot}}|^2}\mathbf{n}$$
+
+
+We can also rewrite $\mathbf{R'}_{\bot}$ as,
+
+$$\mathbf{R'}_{\bot} = \frac{\eta}{\eta'}(\mathbf{R} + (-\mathbf{R} \cdot \mathbf{n}) \mathbf{n} )$$
+
+
+Thus, $\mathbf{R}$ becomes, 
+
+$$\boxed{\mathbf{R} = \left(\frac{\eta}{\eta'}(\mathbf{R} + (-\mathbf{R} \cdot \mathbf{n}) \mathbf{n})\right) - \sqrt{1 - |\mathbf{R'_{\bot}}|^2}\mathbf{n}}$$
+
+
+Which is the `refract_ray` function included in `vector.rs`.
