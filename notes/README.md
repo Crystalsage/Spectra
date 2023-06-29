@@ -119,8 +119,11 @@ We can use gamma correction to produce accurate colors, because most image viewe
 
 We use a gamma factor of 2 in our ray tracer, which means that color components are raised to $\frac{1}{2}$, which is just the square root.
 
+---
 ### Question: Why and how do shadows form on surfaces? 
 
+
+---
 ## Reflectance and scatter
 For Lambertian surfaces, we can just scatter and attenuate by reflectance $R$, or scatter with no attenuation but absorb the fraction $1 - R$ of rays. We reject any scattered rays that have zero component in any direction, because they present some weird graphical glitches.
 
@@ -128,13 +131,36 @@ For reflective surfaces, the rays are no longer randomly scattered, but are gove
 
 **Intuition**:
 
-Let $r$ be the reflected ray. Let $v$ be the incident ray. $n$ is the surface normal vector. 
+Let $E$ be the incident ray. Let $R$ be the reflected ray. Let $A$ be the component of $E$ parallel to reflective surface and $B$ be the component of $E$ perpendicular to the surface. Then,
 
-By the law of reflection , $\theta_i = \theta_r$.
+$$E = A + B$$
+$$R = A - B$$
 
-$v$ can be decomposed into $v_{parallel}$ and $v_{perpendicular}$.
+Since $B$ is the component of $E$ perpendicular to the surface, its magnitude must be equal to the dot product of $E$ and surface normal vector $\hat{n}$. $B$ must also point in the direction of either $\hat{n}$  or $-\hat{n}$.
 
-$$r = -v_{perpendicular} + v_{parallel}$$
-$$\therefore r = -(v + v_{parallel}) + 2 * v_{parallel}$$
-$$\therefore r = -v + 2 * v_{parallel}$$
-$$\therefore r = -v + 2 * (v \cdot n) * n$$
+$$B = (E \cdot \hat{n})\hat{n}$$
+
+Substitute $B$ into $E$ and $R$,
+
+$$E = A + (E \cdot \hat{n})\hat{n}$$
+$$R = A - (E \cdot \hat{n})\hat{n}$$
+
+Readjusting gives,
+
+$$R = E - 2(E \cdot \hat{n})\hat{n}$$
+
+Which is the equation we needed.
+
+The negative sign is due to the surface normal vector facing inwards.
+
+
+## Refraction
+Refraction is described by Snell's law. 
+
+If $\theta$ and $\theta'$ are the angles from the normal, and $\eta$ and $\eta'$ are the refractive indices, then,
+
+$$\eta \cdot \sin{\theta} = \eta' \cdot \sin'{\theta}$$
+
+
+Since the refracted ray is $\mathbf{R'}$
+$$ \mathbf{R'} = \mathbf{R'}_{\bot} + \mathbf{R'}_{\parallel}$$
