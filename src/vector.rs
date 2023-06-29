@@ -111,6 +111,16 @@ impl Vec3 {
         let r_parallel = -(((1.0 - r_perpendicular.length_squared()).abs()).sqrt()) * *n;
         r_perpendicular + r_parallel
     }
+
+    pub fn random_in_unit_disk() -> Self {
+        loop {
+            let p = Vec3::new(random_f64(Some(-1.0), Some(1.0)), random_f64(Some(-1.0), Some(1.0)), 0.0);
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+            return p;
+        }
+    }
 }
 
 

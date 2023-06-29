@@ -8,8 +8,6 @@ mod utility;
 mod camera;
 mod material;
 
-use std::f64::consts::PI;
-
 use crate::camera::Camera;
 use crate::hittable::Hittables;
 use crate::material::Material;
@@ -22,38 +20,75 @@ use crate::ray::Ray;
 use crate::utility::random_f64;
 
 
+fn random_world() -> Hittables<Sphere>{
+    let ground_material = Material::new(MaterialType::Lambertian(Color::new(0.5, 0.5, 0.5)));
+
+    let mut world: Hittables<Sphere> = Hittables::new(Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, ground_material));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = random_f64(None, None);
+            let center: Point3 = Point3::new(a as f64 + 0.9 * random_f64(None, None), 0.2, b as f64 + 0.9 * random_f64(None, None));
+
+            if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                let sphere_material: Material;
+
+                if choose_mat < 0.5 {
+                    let albedo  = Color::random() * Color::random();
+                    sphere_material = Material::new(MaterialType::Lambertian(albedo));
+                    world.add(Sphere::new(center, 0.2, sphere_material));
+                } else if choose_mat < 0.8 {
+                    let albedo = Color::random();
+                    let fuzz = random_f64(Some(0.0), Some(0.5));
+                    sphere_material = Material::new(MaterialType::Metal(albedo, fuzz));
+                    world.add(Sphere::new(center, 0.2, sphere_material));
+                } else {
+                    sphere_material = Material::new(MaterialType::Dielectric(1.5));
+                    world.add(Sphere::new(center, 0.2, sphere_material));
+                }
+            }
+        }
+    }
+
+    let material1 = Material::new(MaterialType::Dielectric(1.5));
+    world.add(Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, material1));
+
+    let material2 = Material::new(MaterialType::Lambertian(Color::new(0.4, 0.2, 0.1)));
+    world.add(Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, material2));
+
+    let material3 = Material::new(MaterialType::Metal(Color::new(0.7, 0.6, 0.5), 0.0));
+    world.add(Sphere::new(Point3::new(4.0, 1.0, 0.0), 1.0, material3));
+
+    world
+}
+
 fn main() {
     let file_path: Option<&str> = Some("render.ppm");
 
     let aspect_ratio = 16.0 / 9.0;
     let width: usize = 1920;
     let height: usize = (width as f64 / aspect_ratio) as usize;
-    let samples_per_pixel = 100;
+    let samples_per_pixel = 500;
     let max_depth = 50;
-
-    // Materials
-    let material_ground = Material::new(MaterialType::Lambertian(Color::new(0.8, 0.8, 0.0)));
-    let material_center = Material::new(MaterialType::Lambertian(Color::new(0.05, 0.05, 0.05)));
-
-    let material_left = Material::new(MaterialType::Dielectric(1.5));
-    let material_right = Material::new(MaterialType::Metal(Color::new(0.8, 0.6, 0.2), 0.0));
 
     
     // World
-    let mut world: Hittables<Sphere> = Hittables::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground));
-    world.add(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center));
-    world.add(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, material_left));
-    world.add(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.45, material_left));
-    world.add(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right));
+    let mut world: Hittables<Sphere> = random_world();
 
     // Camera
-    let cam = Camera::new(Point3::new(-2.0, 2.0, 1.0), Point3::new(0.0, 0.0, -1.0), Vec3::new(0.0, 1.0, 0.0), 20.0, aspect_ratio);
+    let lookfrom = Point3::new(13.0, 2.0, 3.0);
+    let lookat = Point3::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
+
+    let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
 
     let mut pixels: Pixels = vec![vec![0_i64; width as usize]; height as usize];
 
     // And.... render....!
     for y in 0..height {
-        // println!("Scan lines remaining: {}", height-y);
+        println!("Scan lines remaining: {}", height-y);
         for x in 0..width {
             let mut pixel_color = Color::new(0.0, 0.0, 0.0);
             for _ in 0..samples_per_pixel {
