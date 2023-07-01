@@ -1,8 +1,5 @@
 # Notes on ray tracing
 
-## Code structure
-- `Vec3` class: 
-
 ## PPM files
 Reference: https://en.wikipedia.org/wiki/Netpbm
 
@@ -99,8 +96,21 @@ Combining the two things said above, we get the following:
 ![](./figures/sphere_normal_map.png)
 
 ## Antialiasing
+If we decide to do a high quality, say FHD render of our ray tracer scene, then we can see jagged lines which are a product of image generation without anti-aliasing. Real life images and scenery do not have this problem as the edges are a blend of foreground and background of the object in question.
+
+A simple trick is to send multiple rays through the same pixel, and calculate an average of all the colours calculated. The rays have their directions a _little_ bit altered at every iteration. We can imagine this as an infinitesimal change in the direction of ray, but for the same pixel. i.e. $u = u + \Delta{x}$ where $u$ is the horizontal direction vector and $\Delta{x}$ is the infinitesimal change.
+
+![](./figures/antialiasing.png)
+
+To do this, we can calculate color values and perform a single division by the `samples_per_pixel` value at the end, and then clamp that value between $(0.000, 0.999)$
+
+
+
 ## Diffuse materials
 Diffusive materials are materials that diffuse light rays in every direction instead of just reflecting them in a single direction. Also called as matte materials. The reflected ray's light is attenuated.
+
+**The material in the middle is diffusive/matte.**
+![](./figures/ray_traced_metal.png)
 
 For ray tracers, this means having to randomize the direction of the reflected rays. We can randomize the directions at any angle in the hemisphere created by the surface tangent. The hemisphere is shown in *yellow* in the diagram below.
 
@@ -114,6 +124,9 @@ A better trick exists:
 Note: $P - \vec{n}$ exists _inside_ the sphere.
 
 
+![](./figures/lambertian_approximation.png)
+
+
 ### Accurate color intensity
 We can use gamma correction to produce accurate colors, because most image viewers assume that images are gamma corrected. This means our images would look lighter. 
 
@@ -121,11 +134,14 @@ We use a gamma factor of 2 in our ray tracer, which means that color components 
 
 ---
 ### Question: Why and how do shadows form on surfaces? 
+Since the rays incident at the bottom of the sphere reflect from the material and are incident near the surface-sphere boundary, the surface absorbs more light rays at the bottom. Like this:
+
+![](./figures/shadows.png)
 
 
 ---
 ## Reflectance and scatter
-For Lambertian surfaces, we can just scatter and attenuate by reflectance $R$, or scatter with no attenuation but absorb the fraction $1 - R$ of rays. We reject any scattered rays that have zero component in any direction, because they present some weird graphical glitches.
+For Lambertian surfaces, we can just scatter the rays and attenuate by reflectance $R$, or scatter with no attenuation but absorb the fraction $1 - R$ of rays. We reject any scattered rays that have zero component in any direction, because they present some weird graphical glitches.
 
 For reflective surfaces, the rays are no longer randomly scattered, but are governed by mathematical rules. The direction of the reflected ray is $v + 2b$ where $v$ is the incoming ray and $b$ is the surface normal.
 
@@ -135,6 +151,8 @@ Let $E$ be the incident ray. Let $R$ be the reflected ray. Let $A$ be the compon
 
 $$E = A + B$$
 $$R = A - B$$
+
+![](./figures/proof.png)
 
 Since $B$ is the component of $E$ perpendicular to the surface, its magnitude must be equal to the dot product of $E$ and surface normal vector $\hat{n}$. $B$ must also point in the direction of either $\hat{n}$  or $-\hat{n}$.
 
@@ -161,25 +179,31 @@ If $\theta$ and $\theta'$ are the angles from the normal, and $\eta$ and $\eta'$
 
 $$\eta \cdot \sin{\theta} = \eta' \cdot \sin'{\theta}$$
 
+![](./figures/snell.png)
+
 
 Since the refracted ray is $\mathbf{R'}$
-$$ \mathbf{R'} = \mathbf{R'}_{\bot} + \mathbf{R'}_{\parallel}$$
 
-If we solve for $\mathbf{R'}_{\bot}$ and $\mathbf{R'}_{\parallel}$, we  have: 
+$$ \mathbf{R'} = \mathbf{R'}_{\bot} + \mathbf{R'}\_{\parallel}$$
 
-$$\mathbf{R'}_{\bot} = \frac{\eta}{\eta'}(\mathbf{R} +  \cos{\theta n})$$
+If we solve for $\mathbf{R'}\_{\bot}$ and $\mathbf{R'}\_{\parallel}$, we  have: 
 
-$$\mathbf{R'}_{\parallel} = - \sqrt{1 - |\mathbf{R'_{\bot}}|^2}\mathbf{n}$$
+$$\mathbf{R'}\_{\bot} = \frac{\eta}{\eta'}(\mathbf{R} +  \cos{\theta n})$$
+
+$$\mathbf{R'}\_{\parallel} = - \sqrt{1 - |\mathbf{R'}\_{\bot}|^2}\mathbf{n}$$
 
 
-We can also rewrite $\mathbf{R'}_{\bot}$ as,
+We can also rewrite $\mathbf{R'}\_{\bot}$ as,
 
-$$\mathbf{R'}_{\bot} = \frac{\eta}{\eta'}(\mathbf{R} + (-\mathbf{R} \cdot \mathbf{n}) \mathbf{n} )$$
+$$\mathbf{R'}\_{\bot} = \frac{\eta}{\eta'}(\mathbf{R} + (-\mathbf{R} \cdot \mathbf{n}) \mathbf{n} )$$
 
 
 Thus, $\mathbf{R}$ becomes, 
 
-$$\boxed{\mathbf{R} = \left(\frac{\eta}{\eta'}(\mathbf{R} + (-\mathbf{R} \cdot \mathbf{n}) \mathbf{n})\right) - \sqrt{1 - |\mathbf{R'_{\bot}}|^2}\mathbf{n}}$$
+$$\boxed{\mathbf{R} = \left(\frac{\eta}{\eta'}(\mathbf{R} + (-\mathbf{R} \cdot \mathbf{n}) \mathbf{n})\right) - \sqrt{1 - |\mathbf{R'\_{\bot}}|^2}\mathbf{n}}$$
 
 
 Which is the `refract_ray` function included in `vector.rs`.
+
+
+$$\blacksquare\blacksquare\blacksquare \textrm{END} \blacksquare\blacksquare\blacksquare$$
